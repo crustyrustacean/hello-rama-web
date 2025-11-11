@@ -1,0 +1,7 @@
+# hello-rama-web gitignore configuration
+
+# IDE Settings
+.vscode
+
+# Build artifacts
+/target
