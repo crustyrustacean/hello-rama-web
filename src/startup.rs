@@ -2,7 +2,7 @@
 
 // dependencies
 use crate::config::Config;
-use crate::routes::health_check;
+use crate::routes::{get_index, health_check};
 use rama::{http::server::HttpServer, http::service::web::Router, rt::Executor};
 
 pub struct Application {
@@ -24,7 +24,9 @@ impl Application {
     }
 
     pub fn app_web_service() -> Router<()> {
-        Router::new().get("/health_check", health_check)
+        Router::new()
+            .get("/health_check", health_check)
+            .get("/", get_index)
     }
 
     pub async fn run(self) -> Result<(), Box<dyn std::error::Error + Send + Sync + 'static>> {
