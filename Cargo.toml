@@ -1,6 +1,6 @@
 [package]
 name = "hello-rama-web"
-version = "0.1.0"
+version = "0.2.1"
 edition = "2024"
 authors = ["Jeffery D. Mitchell", "<crusty.rustacean@gmail.com>"]
 description = "A playground for learning how to build a web server with Rama"
@@ -8,6 +8,10 @@ readme = "README.md"
 repository = "https://github.com/crustyrustacean/hello-rama-web.git"
 license = "MIT"
 publish = false
+
+[[bin]]
+name = "hello-rama-web"
+path = "src/bin/main.rs"
 
 [dependencies]
 rama = { version = "0.2.0", features = [ "http-full" ] }
