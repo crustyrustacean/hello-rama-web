@@ -1,6 +1,6 @@
 [package]
 name = "hello-rama-web"
-version = "0.3.0"
+version = "0.3.1"
 edition = "2024"
 authors = ["Jeffery D. Mitchell", "<crusty.rustacean@gmail.com>"]
 description = "A playground for learning how to build a web server with Rama"
@@ -14,6 +14,6 @@ name = "hello-rama-web"
 path = "src/bin/main.rs"
 
 [dependencies]
-rama = { version = "0.2.0", features = [ "http", "http-full" ] }
+rama = { git = "https://github.com/plabayo/rama.git", tag = "rama-0.3.0-alpha.3", features = [ "http", "http-full" ] }
 tokio = { version = "1.48.0", features = ["full"] }
 
