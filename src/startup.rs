@@ -2,7 +2,7 @@
 
 // dependencies
 use crate::config::Config;
-use crate::routes::{get_index, health_check};
+use crate::routes::{get_index, get_css_styles, get_javascript, health_check};
 use rama::{
     error::BoxError,
     graceful::Shutdown, http::server::HttpServer, http::service::web::Router, rt::Executor,
@@ -26,6 +26,8 @@ impl Application {
         Router::new()
             .get("/health_check", health_check)
             .get("/", get_index)
+            .get("/static/styles.css", get_css_styles)
+            .get("/static/scripts.js", get_javascript)
     }
 
     pub async fn run(self) -> Result<(), BoxError> {
