@@ -32,3 +32,16 @@ async fn get_static_assets_returns_200_ok_and_javascript_content() {
         ContentType::from(mime::TEXT_JAVASCRIPT)
     );
 }
+
+#[tokio::test]
+async fn get_static_assets_returns_200_ok_and_images_bytes() {
+    // Act
+    let response = send_request("/static/favicon.png").await;
+
+    // Assert
+    assert_eq!(StatusCode::OK, response.status());
+    assert_eq!(
+        response.headers().typed_get::<ContentType>().unwrap(),
+        ContentType::from(mime::IMAGE_PNG)
+    );
+}

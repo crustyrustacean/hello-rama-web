@@ -2,11 +2,11 @@
 
 // dependencies
 use crate::config::Config;
-use crate::routes::{get_index, get_css_styles, get_javascript, health_check};
+use crate::routes::{get_css_styles, get_images, get_index, get_javascript, health_check};
+use rama::error::{ErrorContext, OpaqueError};
 use rama::{
-    error::BoxError,
-    graceful::Shutdown, http::server::HttpServer, http::service::web::Router, rt::Executor,
-    tcp::server::TcpListener,
+    error::BoxError, graceful::Shutdown, http::server::HttpServer, http::service::web::Router,
+    rt::Executor, tcp::server::TcpListener,
 };
 use std::time::Duration;
 
@@ -28,12 +28,16 @@ impl Application {
             .get("/", get_index)
             .get("/static/styles.css", get_css_styles)
             .get("/static/scripts.js", get_javascript)
+            .get("/static/favicon.png", get_images)
     }
 
     pub async fn run(self) -> Result<(), BoxError> {
         let graceful = Shutdown::default();
 
-        let tcp_listener = TcpListener::bind(self.config.address).await?;
+        let tcp_listener = TcpListener::bind(self.config.address)
+            .await
+            .map_err(OpaqueError::from_boxed)
+            .context("Unable to create TCP listener")?;
 
         graceful.spawn_task_fn(async |guard| {
             let exec = Executor::graceful(guard.clone());
