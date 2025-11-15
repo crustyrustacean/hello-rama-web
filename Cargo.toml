@@ -1,6 +1,6 @@
 [package]
 name = "hello-rama-web"
-version = "0.3.1"
+version = "0.4.0"
 edition = "2024"
 authors = ["Jeffery D. Mitchell", "<crusty.rustacean@gmail.com>"]
 description = "A playground for learning how to build a web server with Rama"
