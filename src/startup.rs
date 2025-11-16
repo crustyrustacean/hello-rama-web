@@ -2,7 +2,7 @@
 
 // dependencies
 use crate::config::Config;
-use crate::routes::{get_css_styles, get_images, get_index, get_javascript, health_check};
+use crate::routes::{get_css_file, get_image_file, get_index, get_scripts_file, health_check};
 use rama::error::{ErrorContext, OpaqueError};
 use rama::{
     error::BoxError, graceful::Shutdown, http::server::HttpServer, http::service::web::Router,
@@ -26,9 +26,9 @@ impl Application {
         Router::new()
             .get("/health_check", health_check)
             .get("/", get_index)
-            .get("/static/styles.css", get_css_styles)
-            .get("/static/scripts.js", get_javascript)
-            .get("/static/favicon.png", get_images)
+            .get("/static/styles.css", get_css_file)
+            .get("/static/scripts.js", get_scripts_file)
+            .get("/static/favicon.png", get_image_file)
     }
 
     pub async fn run(self) -> Result<(), BoxError> {
@@ -46,7 +46,7 @@ impl Application {
         });
 
         graceful
-            .shutdown_with_limit(Duration::from_secs(30))
+            .shutdown_with_limit(Duration::from_secs(2))
             .await?;
 
         Ok(())

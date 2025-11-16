@@ -1,6 +1,6 @@
 [package]
 name = "hello-rama-web"
-version = "0.6.0"
+version = "0.7.0"
 edition = "2024"
 authors = ["Jeffery D. Mitchell", "<crusty.rustacean@gmail.com>"]
 description = "A playground for learning how to build a web server with Rama"
@@ -15,5 +15,6 @@ path = "src/bin/main.rs"
 
 [dependencies]
 rama = { git = "https://github.com/plabayo/rama.git", tag = "rama-0.3.0-alpha.3", features = [ "http", "http-full" ] }
+rust-embed = "8.9.0"
 tokio = { version = "1.48.0", features = ["full"] }
 
