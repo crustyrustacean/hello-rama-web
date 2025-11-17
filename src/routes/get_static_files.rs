@@ -7,42 +7,41 @@ use rama::http::Response;
 use rama::http::StatusCode;
 use rama::http::service::web::response::IntoResponse;
 
-// endpoint which returns a 200 OK response and CSS in the body
-pub async fn get_css_file() -> impl IntoResponse {
-    let css_file = Asset::get("styles.css").unwrap();
-    let contents = std::str::from_utf8(css_file.data.as_ref())
-        .unwrap()
-        .to_string();
+macro_rules! static_file_handler {
+    ($fn_name:ident, $filename:expr, $content_type:expr) => {
+        pub async fn $fn_name() -> impl IntoResponse {
+            let asset = Asset::get($filename).unwrap();
+            let contents = std::str::from_utf8(asset.data.as_ref())
+                .unwrap()
+                .to_string();
 
-    Response::builder()
-        .status(StatusCode::OK)
-        .header("content-type", "text/css; charset=utf-8")
-        .body(contents)
-        .unwrap()
+            Response::builder()
+                .status(StatusCode::OK)
+                .header("content-type", $content_type)
+                .body(contents)
+                .unwrap()
+        }
+    };
+
+    ($fn_name:ident, $filename:expr, $content_type:expr, binary) => {
+        pub async fn $fn_name() -> impl IntoResponse {
+            let asset = Asset::get($filename).unwrap();
+            let contents = asset.data.as_ref().to_vec();
+
+            Response::builder()
+                .status(StatusCode::OK)
+                .header("content-type", $content_type)
+                .body(Body::from(contents))
+                .unwrap()
+        }
+    };
 }
 
-// endpoint which returns a 200 OK response and CSS in the body
-pub async fn get_scripts_file() -> impl IntoResponse {
-    let scripts_file = Asset::get("scripts.js").unwrap();
-    let contents = std::str::from_utf8(scripts_file.data.as_ref())
-        .unwrap()
-        .to_string();
+// endpoint which returns 200 OK and the css styles
+static_file_handler!(get_css_file, "styles.css", "text/css; charset=utf-8");
 
-    Response::builder()
-        .status(StatusCode::OK)
-        .header("content-type", "text/javascript")
-        .body(contents)
-        .unwrap()
-}
+// endpoint which returns 200 OK and the JavaScript scripts
+static_file_handler!(get_scripts_file, "scripts.js", "text/javascript");
 
-// endpoint which returns a 200 OK response and CSS in the body
-pub async fn get_image_file() -> impl IntoResponse {
-    let image_file = Asset::get("favicon.png").unwrap();
-    let contents = image_file.data.as_ref().to_vec();
-
-    Response::builder()
-        .status(StatusCode::OK)
-        .header("content-type", "image/png")
-        .body(Body::from(contents))
-        .unwrap()
-}
+// endpoint which returns 200 OK and the favicon file
+static_file_handler!(get_image_file, "favicon.png", "image/png", binary);
