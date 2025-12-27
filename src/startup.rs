@@ -2,8 +2,10 @@
 
 // dependencies
 use crate::config::Config;
-use crate::routes::{get_css_file, get_image_file, get_index, get_scripts_file, health_check};
-use rama::error::{ErrorContext, OpaqueError};
+use crate::errors::AppBoxError;
+use crate::errors::AppErrorContext;
+use crate::errors::AppOpaqueError;
+use crate::routes::health_check;
 use rama::{
     error::BoxError, graceful::Shutdown, http::server::HttpServer, http::service::web::Router,
     rt::Executor, tcp::server::TcpListener,
@@ -12,41 +14,39 @@ use std::time::Duration;
 
 pub struct Application {
     pub router: Router<()>,
-    pub config: Config,
+    pub listener: TcpListener,
 }
 
 impl Application {
-    pub fn build(config: Config) -> Self {
-        let router = Self::app_web_service();
+    pub async fn build(config: Config) -> Result<Self, AppBoxError> {
+        let router = Self::build_app_router();
+        let address = format!("{}:{}", config.host, config.port);
+        let listener = TcpListener::bind(address)
+            .await
+            .map_err(AppOpaqueError::from_boxed)
+            .context("Unable to create TCP listener")?;
 
-        Self { router, config }
+        Ok(Self { router, listener })
     }
 
-    pub fn app_web_service() -> Router<()> {
-        Router::new()
-            .get("/health_check", health_check)
-            .get("/", get_index)
-            .get("/static/styles.css", get_css_file)
-            .get("/static/scripts.js", get_scripts_file)
-            .get("/static/favicon.png", get_image_file)
+    pub fn build_app_router() -> Router<()> {
+        Router::new().with_get("/health_check", health_check)
     }
 
     pub async fn run(self) -> Result<(), BoxError> {
         let graceful = Shutdown::default();
 
-        let tcp_listener = TcpListener::bind(self.config.address)
-            .await
-            .map_err(OpaqueError::from_boxed)
-            .context("Unable to create TCP listener")?;
+        let router = self.router;
+        let listener = self.listener;
 
-        graceful.spawn_task_fn(async |guard| {
+        graceful.spawn_task_fn(async move |guard| {
             let exec = Executor::graceful(guard.clone());
-            let http_service = HttpServer::auto(exec).service(self.router);
-            tcp_listener.serve_graceful(guard, http_service).await;
+            let http_service = HttpServer::auto(exec).service(router);
+            listener.serve_graceful(guard, http_service).await;
         });
 
         graceful
-            .shutdown_with_limit(Duration::from_secs(2))
+            .shutdown_with_limit(Duration::from_secs(10))
             .await?;
 
         Ok(())
