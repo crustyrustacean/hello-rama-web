@@ -1,16 +1,15 @@
 // src/state.rs
 
-#[derive(Debug, Clone)]
-pub struct AppState {}
+// dependencies
+use tera::Tera;
 
-impl AppState {
-    pub fn new() -> Self {
-        Self {}
-    }
+#[derive(Debug, Clone)]
+pub struct AppState {
+    pub templates: &'static Tera,
 }
 
-impl Default for AppState {
-    fn default() -> Self {
-        Self::new()
+impl AppState {
+    pub fn new(templates: &'static Tera) -> Self {
+        Self { templates }
     }
 }

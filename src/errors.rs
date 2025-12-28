@@ -6,6 +6,7 @@ pub use rama::error::BoxError as AppBoxError;
 pub use rama::error::ErrorContext as AppErrorContext;
 pub use rama::error::OpaqueError as AppOpaqueError;
 use rama::http::{StatusCode, response::Response, service::web::response::IntoResponse};
+use rama::telemetry::tracing;
 
 // Unified error type for the API
 #[derive(Debug, thiserror::Error)]
@@ -33,6 +34,10 @@ pub enum ApiError {
 
     #[error("Service unavailable: {0}")]
     ServiceUnavailable(String),
+
+    // Template-specific errors
+    #[error(transparent)]
+    Tera(#[from] tera::Error),
 }
 
 // implement the IntoResponse trait for the ApiError type
@@ -47,6 +52,14 @@ impl IntoResponse for ApiError {
             ApiError::UnprocessableEntity(msg) => (StatusCode::UNPROCESSABLE_ENTITY, msg),
             ApiError::InternalServerError(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg),
             ApiError::ServiceUnavailable(msg) => (StatusCode::SERVICE_UNAVAILABLE, msg),
+            ApiError::Tera(err) => {
+                // Log the actual template error for debugging
+                tracing::error!("Template rendering error: {}", err);
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "An error occurred while rendering the page".to_string(),
+                )
+            }
         };
 
         ApiResponse::<()>::error(&message, status).into_response()

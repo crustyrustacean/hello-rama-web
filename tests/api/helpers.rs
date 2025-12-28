@@ -1,9 +1,11 @@
 // test/api/helpers
 
 // dependencies
+use hello_rama_web::configuration::get_configuration;
 use hello_rama_web::startup::Application;
 use hello_rama_web::state::AppState;
 use hello_rama_web::telemetry::{get_subscriber, init_subscriber, make_request_span};
+use hello_rama_web::templates::compile_templates;
 use rama::Layer;
 use rama::Service;
 use rama::http::layer::trace::TraceLayer;
@@ -25,8 +27,10 @@ pub static TRACING: LazyLock<()> = LazyLock::new(|| {
 
 pub async fn send_request(uri: &str) -> Response {
     LazyLock::force(&TRACING);
-
-    let state = AppState::default();
+    let configuration = get_configuration().expect("Failed to read configuration.");
+    let compiled_templates =
+        compile_templates(&configuration).expect("Failed to compile templates.");
+    let state = AppState::new(compiled_templates);
     let router = Application::build_app_router(state);
     let service = TraceLayer::new_for_http()
         .make_span_with(make_request_span)

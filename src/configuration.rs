@@ -15,6 +15,8 @@ pub struct ApplicationSettings {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
     pub host: String,
+    pub template_dir: String,
+    pub template_pattern: String,
 }
 
 // The possible runtime environment for our application.

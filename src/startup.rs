@@ -5,9 +5,10 @@ use crate::configuration::Settings;
 use crate::errors::AppBoxError;
 use crate::errors::AppErrorContext;
 use crate::errors::AppOpaqueError;
-use crate::routes::health_check;
+use crate::routes::{get_index, health_check};
 use crate::state::AppState;
 use crate::telemetry::make_request_span;
+use crate::templates::compile_templates;
 use rama::{
     Layer, error::BoxError, graceful::Shutdown, http::layer::trace::TraceLayer,
     http::server::HttpServer, http::service::web::Router, rt::Executor, tcp::server::TcpListener,
@@ -22,7 +23,8 @@ pub struct Application {
 
 impl Application {
     pub async fn build(configuration: Settings) -> Result<Self, AppBoxError> {
-        let state = AppState::default();
+        let compiled_templates = compile_templates(&configuration)?;
+        let state = AppState::new(compiled_templates);
         let router = Self::build_app_router(state);
         let address = format!(
             "{}:{}",
@@ -46,7 +48,9 @@ impl Application {
 
     pub fn build_app_router(state: AppState) -> Router<AppState> {
         tracing::info!("Health check enabled at: /health_check");
-        Router::new_with_state(state).with_get("/health_check", health_check)
+        Router::new_with_state(state)
+            .with_get("/health_check", health_check)
+            .with_get("/", get_index)
     }
 
     pub async fn run(self) -> Result<(), BoxError> {
