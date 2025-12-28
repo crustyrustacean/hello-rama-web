@@ -3,5 +3,8 @@
 # IDE Settings
 .vscode
 
+# Environment Variables
+.env
+
 # Build artifacts
 /target

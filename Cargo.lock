@@ -317,8 +317,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "145052bdd345b87320e369255277e3fb5152762ad123a901ef5c262dd38fe8d2"
 dependencies = [
  "iana-time-zone",
+ "js-sys",
  "num-traits",
  "serde",
+ "wasm-bindgen",
  "windows-link",
 ]
 
@@ -847,9 +849,12 @@ checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
 name = "hello-rama-web"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
+ "chrono",
  "rama",
+ "serde",
+ "thiserror",
  "tokio",
 ]
 

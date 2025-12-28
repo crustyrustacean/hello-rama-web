@@ -8,7 +8,7 @@ use crate::errors::AppOpaqueError;
 use crate::routes::health_check;
 use rama::{
     error::BoxError, graceful::Shutdown, http::server::HttpServer, http::service::web::Router,
-    rt::Executor, tcp::server::TcpListener,
+    rt::Executor, tcp::server::TcpListener, telemetry::tracing,
 };
 use std::time::Duration;
 
@@ -24,12 +24,17 @@ impl Application {
         let listener = TcpListener::bind(address)
             .await
             .map_err(AppOpaqueError::from_boxed)
-            .context("Unable to create TCP listener")?;
+            .context(format!(
+                "Unable to create TCP listener on: Host: {}, Port: {}",
+                config.host, config.port
+            ))?;
 
+        tracing::info!("Listening on: Host: {}, Port: {}", config.host, config.port);
         Ok(Self { router, listener })
     }
 
     pub fn build_app_router() -> Router<()> {
+        tracing::info!("Health check enabled at: /health_check");
         Router::new().with_get("/health_check", health_check)
     }
 
@@ -39,6 +44,7 @@ impl Application {
         let router = self.router;
         let listener = self.listener;
 
+        tracing::info!("Running the application...");
         graceful.spawn_task_fn(async move |guard| {
             let exec = Executor::graceful(guard.clone());
             let http_service = HttpServer::auto(exec).service(router);

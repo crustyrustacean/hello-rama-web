@@ -1,6 +1,6 @@
 [package]
 name = "hello-rama-web"
-version = "0.9.0"
+version = "0.10.0"
 edition = "2024"
 authors = ["Jeffery D. Mitchell", "<crusty.rustacean@gmail.com>"]
 description = "A playground for learning how to build an API with Rama"
@@ -14,7 +14,10 @@ name = "hello-rama-web"
 path = "src/bin/main.rs"
 
 [dependencies]
+chrono = "0.4.42"
 rama = { git = "https://github.com/plabayo/rama.git", tag = "rama-0.3.0-alpha.4", features = [ "http-full" ] }
+serde = { version = "1.0.228", features = ["derive"] }
+thiserror = "2.0.17"
 tokio = { version = "1.48.0", features = ["full"] }
 
 [profile.release]
