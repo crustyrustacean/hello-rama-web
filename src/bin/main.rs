@@ -1,35 +1,29 @@
 // src/main.rs
 
 // dependencies
-use hello_rama_web::config::Config;
+use hello_rama_web::configuration::get_configuration;
 use hello_rama_web::errors::{AppBoxError, AppErrorContext, AppOpaqueError};
 use hello_rama_web::startup::Application;
-use rama::telemetry::tracing::{
-    self,
-    level_filters::LevelFilter,
-    subscriber::{self, EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt},
-};
+use hello_rama_web::telemetry::{get_subscriber, init_subscriber};
+use rama::telemetry::tracing;
 
 #[tokio::main]
 async fn main() -> Result<(), AppBoxError> {
     // initialize tracing
-    tracing::info!("Initialize tracing...");
-    subscriber::registry()
-        .with(fmt::layer())
-        .with(
-            EnvFilter::builder()
-                .with_default_directive(LevelFilter::DEBUG.into())
-                .from_env_lossy(),
-        )
-        .init();
+    let subscriber = get_subscriber(
+        "hello-rama-web".into(),
+        "info,rama=debug".into(),
+        std::io::stdout,
+    );
+    init_subscriber(subscriber);
 
     // build the app configuration
     tracing::info!("Reading app configuration...");
-    let config = Config::default();
+    let configuration = get_configuration().expect("Failed to read configuration");
 
     // build and run the application
     tracing::info!("Building the application...");
-    Application::build(config)
+    Application::build(configuration)
         .await
         .map_err(AppOpaqueError::from_boxed)
         .context("Unable to build the server on the configured host and port.")?
