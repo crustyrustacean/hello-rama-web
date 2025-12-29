@@ -27,5 +27,6 @@ RUN apt-get update -y \
 COPY --from=builder /app/target/release/hello-rama-web hello-rama-web
 COPY configuration configuration
 COPY templates templates
+COPY static static
 ENV APP_ENVIRONMENT production
 ENTRYPOINT ["./hello-rama-web"]
