@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" type="text/css" href="/static/screen.css" />
   <link rel="icon" type="x-icon/image" href="/static/favicon.png" />
-  <title>Hello Rama Web | {{ title }}</title>
+  <title>Rama Web Server | {{ page_title }}</title>
 </head>
 <body>
   <header>
-    <h1>Hello, World!</h1>
+    <h1>Hello Rama Web</h1>
   </header>
   <main>
-    {%block content %}{% endblock %}
+    {% block content %}{% endblock content %}
   </main>
   <footer>
     <p>&copy Jeffery D. Mitchell</p>

@@ -23,11 +23,11 @@ async fn main() -> Result<(), AppBoxError> {
 
     // build and run the application
     tracing::info!("Building the application...");
-    Application::build(configuration)
+    Application::build(&configuration)
         .await
         .map_err(AppOpaqueError::from_boxed)
         .context("Unable to build the server on the configured host and port.")?
-        .run()
+        .run(&configuration)
         .await
         .map_err(AppOpaqueError::from_boxed)
         .context("Unable to run the server")?;

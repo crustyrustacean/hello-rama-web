@@ -17,6 +17,7 @@ pub struct ApplicationSettings {
     pub host: String,
     pub template_dir: String,
     pub template_pattern: String,
+    pub shutdown_timeout: u64,
 }
 
 // The possible runtime environment for our application.

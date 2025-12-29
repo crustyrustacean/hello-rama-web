@@ -5,7 +5,7 @@ use crate::configuration::Settings;
 use crate::errors::AppBoxError;
 use crate::errors::AppErrorContext;
 use crate::errors::AppOpaqueError;
-use crate::routes::{health_check, render_page};
+use crate::routes::{health_check, render_not_found, render_page_home};
 use crate::state::AppState;
 use crate::telemetry::make_request_span;
 use crate::templates::compile_templates;
@@ -16,7 +16,7 @@ use rama::{
     http::layer::trace::TraceLayer,
     http::server::HttpServer,
     http::service::fs::DirectoryServeMode::NotFound,
-    http::service::web::{Router, response::Redirect},
+    http::service::web::{Router, response::DatastarScript},
     rt::Executor,
     tcp::server::TcpListener,
     telemetry::tracing,
@@ -29,9 +29,9 @@ pub struct Application {
 }
 
 impl Application {
-    pub async fn build(configuration: Settings) -> Result<Self, AppBoxError> {
+    pub async fn build(configuration: &Settings) -> Result<Self, AppBoxError> {
         // compile the app templates
-        let compiled_templates = compile_templates(&configuration)?;
+        let compiled_templates = compile_templates(configuration)?;
 
         // build app state
         let state = AppState::new(compiled_templates);
@@ -62,15 +62,15 @@ impl Application {
     }
 
     pub fn build_app_router(state: AppState) -> Router<AppState> {
-        tracing::info!("Health check enabled at: /health_check");
         Router::new_with_state(state)
             .with_get("/health_check", health_check)
-            .with_get("/{name}", render_page)
-            .with_not_found(Redirect::temporary("/index"))
+            .with_get("/", render_page_home)
+            .with_get("/static/datastar.js", DatastarScript::default())
+            .with_not_found(render_not_found)
             .with_dir_and_serve_mode("/static", "static", NotFound)
     }
 
-    pub async fn run(self) -> Result<(), BoxError> {
+    pub async fn run(self, configuration: &Settings) -> Result<(), BoxError> {
         let graceful = Shutdown::default();
 
         let router = self.router;
@@ -88,7 +88,9 @@ impl Application {
         });
 
         graceful
-            .shutdown_with_limit(Duration::from_secs(10))
+            .shutdown_with_limit(Duration::from_secs(
+                configuration.application.shutdown_timeout,
+            ))
             .await?;
 
         Ok(())

@@ -4,3 +4,4 @@ application:
   port: 8000
   template_dir: "templates"
   template_pattern: "**/*"
+  shutdown_timeout: 10
