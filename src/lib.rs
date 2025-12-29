@@ -3,6 +3,7 @@
 // module declarations
 pub mod configuration;
 pub mod errors;
+pub mod markdown;
 pub mod response;
 pub mod routes;
 pub mod startup;
@@ -13,6 +14,7 @@ pub mod templates;
 // re-exports
 pub use configuration::*;
 pub use errors::*;
+pub use markdown::*;
 pub use response::*;
 pub use startup::*;
 pub use state::*;

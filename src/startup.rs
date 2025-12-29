@@ -5,13 +5,13 @@ use crate::configuration::Settings;
 use crate::errors::AppBoxError;
 use crate::errors::AppErrorContext;
 use crate::errors::AppOpaqueError;
-use crate::routes::{get_index, health_check};
+use crate::routes::{health_check, render_page};
 use crate::state::AppState;
 use crate::telemetry::make_request_span;
 use crate::templates::compile_templates;
 use rama::{
     Layer, error::BoxError, graceful::Shutdown, http::layer::trace::TraceLayer,
-    http::server::HttpServer, http::service::web::Router, rt::Executor, tcp::server::TcpListener,
+    http::server::HttpServer, http::service::fs::DirectoryServeMode::NotFound, http::service::web::{response::Redirect, Router}, rt::Executor, tcp::server::TcpListener,
     telemetry::tracing,
 };
 use std::time::Duration;
@@ -23,9 +23,16 @@ pub struct Application {
 
 impl Application {
     pub async fn build(configuration: Settings) -> Result<Self, AppBoxError> {
+        // compile the app templates
         let compiled_templates = compile_templates(&configuration)?;
+
+        // build app state
         let state = AppState::new(compiled_templates);
+
+        // build the app router
         let router = Self::build_app_router(state);
+
+        // configure the host and port
         let address = format!(
             "{}:{}",
             configuration.application.host, configuration.application.port
@@ -43,6 +50,7 @@ impl Application {
             configuration.application.host,
             configuration.application.port
         );
+
         Ok(Self { router, listener })
     }
 
@@ -50,7 +58,9 @@ impl Application {
         tracing::info!("Health check enabled at: /health_check");
         Router::new_with_state(state)
             .with_get("/health_check", health_check)
-            .with_get("/", get_index)
+            .with_get("/{name}", render_page)
+            .with_not_found(Redirect::temporary("/index"))
+            .with_dir_and_serve_mode("/static", "static", NotFound)
     }
 
     pub async fn run(self) -> Result<(), BoxError> {

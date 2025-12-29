@@ -3,9 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hello Rama Web</title>
+  <link rel="stylesheet" type="text/css" href="/static/screen.css" />
+  <link rel="icon" type="x-icon/image" href="/static/favicon.png" />
+  <title>Hello Rama Web | {{ title }}</title>
 </head>
 <body>
-  <h1>Hello, Rama!</h1>
+  <header>
+    <h1>Hello, World!</h1>
+  </header>
+  <main>
+    {%block content %}{% endblock %}
+  </main>
+  <footer>
+    <p>&copy Jeffery D. Mitchell</p>
+  </footer>
+  <script src="/static/scripts.js"></script>
 </body>
 </html>
