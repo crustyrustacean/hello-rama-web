@@ -5,7 +5,7 @@ use crate::configuration::Settings;
 use crate::errors::AppBoxError;
 use crate::errors::AppErrorContext;
 use crate::errors::AppOpaqueError;
-use crate::routes::{health_check, render_not_found, render_page_home};
+use crate::routes::{health_check, render_page_home, render_not_found};
 use crate::state::AppState;
 use crate::telemetry::make_request_span;
 use crate::templates::compile_templates;
@@ -66,8 +66,8 @@ impl Application {
             .with_get("/health_check", health_check)
             .with_get("/", render_page_home)
             .with_get("/static/datastar.js", DatastarScript::default())
-            .with_not_found(render_not_found)
             .with_dir_and_serve_mode("/static", "static", NotFound)
+            .with_not_found(render_not_found)
     }
 
     pub async fn run(self, configuration: &Settings) -> Result<(), BoxError> {

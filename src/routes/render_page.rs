@@ -4,6 +4,7 @@
 use crate::errors::ApiError;
 use crate::markdown::markdown_to_html;
 use crate::state::AppState;
+use rama::http::StatusCode;
 use rama::http::service::web::extract::State;
 use rama::http::service::web::response::Html;
 use tera::Context;
@@ -32,14 +33,15 @@ pub async fn render_page_home(State(state): State<AppState>) -> Result<Html<Stri
     Ok(Html(body))
 }
 
-pub async fn render_not_found(State(state): State<AppState>) -> Result<Html<String>, ApiError> {
+pub async fn render_not_found(State(state): State<AppState>) -> Result<(StatusCode, Html<String>), ApiError> {
     let mut context = Context::new();
     let not_found_page_title = "404 Not Found".to_string();
     context.insert("page_title", &not_found_page_title);
+
     let body = state
         .templates
         .render("404.html", &context)
         .map_err(|e| ApiError::InternalServerError(format!("Template error: {}", e)))?;
 
-    Ok(Html(body))
+    Ok((StatusCode::NOT_FOUND, Html(body)))
 }
