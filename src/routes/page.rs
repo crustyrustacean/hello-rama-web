@@ -20,8 +20,10 @@ struct PageContext {
     msg: String,
 }
 
-pub async fn render_page(State(state): State<AppState>, Path(page): Path<Page>) -> Result<Html<String>, ApiError> {
-          
+pub async fn render_page(
+    State(state): State<AppState>,
+    Path(page): Path<Page>,
+) -> Result<Html<String>, ApiError> {
     let page_title = page.name.clone();
     let content_name = format!("{}.md", page_title);
     let content_dir = format!("content/{}", content_name);
@@ -35,7 +37,10 @@ pub async fn render_page(State(state): State<AppState>, Path(page): Path<Page>) 
 
     let body = state
         .templates
-        .render(&format!("{}.html", page.name), &Context::from_serialize(&page_context)?)
+        .render(
+            &format!("{}.html", page.name),
+            &Context::from_serialize(&page_context)?,
+        )
         .map_err(|e| ApiError::InternalServerError(format!("Template error: {}", e)))?;
 
     Ok(Html(body))

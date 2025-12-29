@@ -10,8 +10,15 @@ use crate::state::AppState;
 use crate::telemetry::make_request_span;
 use crate::templates::compile_templates;
 use rama::{
-    Layer, error::BoxError, graceful::Shutdown, http::layer::trace::TraceLayer,
-    http::server::HttpServer, http::service::fs::DirectoryServeMode::NotFound, http::service::web::{response::Redirect, Router}, rt::Executor, tcp::server::TcpListener,
+    Layer,
+    error::BoxError,
+    graceful::Shutdown,
+    http::layer::trace::TraceLayer,
+    http::server::HttpServer,
+    http::service::fs::DirectoryServeMode::NotFound,
+    http::service::web::{Router, response::Redirect},
+    rt::Executor,
+    tcp::server::TcpListener,
     telemetry::tracing,
 };
 use std::time::Duration;
