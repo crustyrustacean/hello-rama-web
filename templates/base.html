@@ -8,14 +8,14 @@
   <title>Rama Web Server | {{ page_title }}</title>
 </head>
 <body>
-  <header>
+  <header id="header">
     <h1>Hello Rama Web</h1>
   </header>
-  <main>
+  <main id="main">
     {% block content %}{% endblock content %}
   </main>
-  <footer>
-    <p>&copy Jeffery D. Mitchell</p>
+  <footer id="footer">
+    <p>&copy <span id="year_span">{{ footer_year }}</span> Jeffery D. Mitchell</p>
   </footer>
   <script src="/static/scripts.js"></script>
 </body>
