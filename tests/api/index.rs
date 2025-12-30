@@ -11,7 +11,6 @@ async fn render_index_page_returns_html() {
     let response_status = response.status();
     let response_header = response.headers().get("Content-Type").unwrap().to_owned();
     let response_body = response.try_into_string().await.unwrap();
-    
 
     // Assert
     assert_eq!(StatusCode::OK, response_status);

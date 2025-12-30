@@ -8,7 +8,7 @@ use rama::http::StatusCode;
 async fn static_route_handler_serves_css() {
     // Arrange
     let css_asset = "screen.css";
-    
+
     // Act
     let response = send_request(&format!("/static/{}", css_asset)).await;
     let response_header = response.headers().get("Content-Type").unwrap();

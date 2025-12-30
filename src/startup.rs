@@ -5,7 +5,9 @@ use crate::configuration::Settings;
 use crate::errors::AppBoxError;
 use crate::errors::AppErrorContext;
 use crate::errors::AppOpaqueError;
-use crate::routes::{health_check, render_page_home, render_not_found};
+use crate::routes::{
+    health_check, render_not_found, render_page_home, reset_message, update_message,
+};
 use crate::state::AppState;
 use crate::telemetry::make_request_span;
 use crate::templates::compile_templates;
@@ -63,7 +65,14 @@ impl Application {
 
     pub fn build_app_router(state: AppState) -> Router<AppState> {
         Router::new_with_state(state)
-            .with_get("/health_check", health_check)
+            .with_sub_router_make_fn("/api", |router| {
+                router.with_sub_router_make_fn("/v1", |router| {
+                    router
+                        .with_get("/health_check", health_check)
+                        .with_get("/update", update_message)
+                        .with_get("/reset", reset_message)
+                })
+            })
             .with_get("/", render_page_home)
             .with_get("/static/datastar.js", DatastarScript::default())
             .with_dir_and_serve_mode("/static", "static", NotFound)

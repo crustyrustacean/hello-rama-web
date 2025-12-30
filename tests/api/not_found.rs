@@ -11,7 +11,6 @@ async fn render_not_found_returns_404_for_nonexistant_routes() {
     let response_status = response.status();
     let response_header = response.headers().get("Content-Type").unwrap().to_owned();
     let response_body = response.try_into_string().await.unwrap();
-    
 
     // Assert
     assert_eq!(StatusCode::NOT_FOUND, response_status);

@@ -4,11 +4,11 @@
 use crate::errors::ApiError;
 use crate::markdown::markdown_to_html;
 use crate::state::AppState;
+use chrono::{Datelike, Local};
 use rama::http::StatusCode;
 use rama::http::service::web::extract::State;
 use rama::http::service::web::response::Html;
 use tera::Context;
-use chrono::{Datelike, Local};
 
 #[derive(serde::Serialize)]
 struct IndexPageContext {
@@ -25,7 +25,7 @@ pub async fn render_page_home(State(state): State<AppState>) -> Result<Html<Stri
     let index_page_context = IndexPageContext {
         page_title: index_page_title,
         page_content: index_page_content,
-        footer_year: Local::now().year()
+        footer_year: Local::now().year(),
     };
 
     let body = state
@@ -36,7 +36,9 @@ pub async fn render_page_home(State(state): State<AppState>) -> Result<Html<Stri
     Ok(Html(body))
 }
 
-pub async fn render_not_found(State(state): State<AppState>) -> Result<(StatusCode, Html<String>), ApiError> {
+pub async fn render_not_found(
+    State(state): State<AppState>,
+) -> Result<(StatusCode, Html<String>), ApiError> {
     let mut context = Context::new();
     let not_found_page_title = "404 Not Found".to_string();
     let footer_year = Local::now().year();
