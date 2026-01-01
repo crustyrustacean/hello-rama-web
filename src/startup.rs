@@ -6,7 +6,7 @@ use crate::errors::AppBoxError;
 use crate::errors::AppErrorContext;
 use crate::errors::AppOpaqueError;
 use crate::routes::{
-    health_check, render_not_found, render_page_home, reset_message, update_message,
+    health_check, not_found, home_page, reset_message, update_message, robots_txt, sitemap_xml
 };
 use crate::state::AppState;
 use crate::telemetry::make_request_span;
@@ -73,10 +73,12 @@ impl Application {
                         .with_get("/reset", reset_message)
                 })
             })
-            .with_get("/", render_page_home)
+            .with_get("/", home_page)
             .with_get("/static/datastar.js", DatastarScript::default())
+            .with_get("/robots.txt", robots_txt)
+            .with_get("/sitemap.xml", sitemap_xml)
             .with_dir_and_serve_mode("/static", "static", NotFound)
-            .with_not_found(render_not_found)
+            .with_not_found(not_found)
     }
 
     pub async fn run(self, configuration: &Settings) -> Result<(), BoxError> {
