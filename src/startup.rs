@@ -15,9 +15,11 @@ use rama::{
     Layer,
     error::BoxError,
     graceful::Shutdown,
+    http::headers::CacheControl,
+    http::layer::set_header::SetResponseHeaderLayer,
     http::layer::trace::TraceLayer,
     http::server::HttpServer,
-    http::service::fs::DirectoryServeMode::NotFound,
+    http::service::fs::{DirectoryServeMode::NotFound, ServeDir},
     http::service::web::{Router, response::DatastarScript},
     rt::Executor,
     tcp::server::TcpListener,
@@ -64,6 +66,17 @@ impl Application {
     }
 
     pub fn build_app_router(state: AppState) -> Router<AppState> {
+        // create the directory for static assets to be served from
+        let assets_dir = ServeDir::new("static").with_directory_serve_mode(NotFound);
+
+        // add cache control policy to static assets, hard coded to 1 week
+        let cached_assets = SetResponseHeaderLayer::if_not_present_typed(
+            CacheControl::new()
+                .with_max_age_seconds(604800)
+                .with_public(),
+        )
+        .into_layer(assets_dir);
+        
         Router::new_with_state(state)
             .with_sub_router_make_fn("/api", |router| {
                 router.with_sub_router_make_fn("/v1", |router| {
@@ -77,7 +90,7 @@ impl Application {
             .with_get("/static/datastar.js", DatastarScript::default())
             .with_get("/robots.txt", robots_txt)
             .with_get("/sitemap.xml", sitemap_xml)
-            .with_dir_and_serve_mode("/static", "static", NotFound)
+            .with_sub_service("/static", cached_assets)
             .with_not_found(not_found)
     }
 
@@ -87,14 +100,13 @@ impl Application {
         let router = self.router;
         let listener = self.listener;
 
+         let http_service_with_tracing =
+            TraceLayer::new_for_http().make_span_with(make_request_span);
+
         tracing::info!("Running the application...");
         graceful.spawn_task_fn(async |guard| {
             let exec = Executor::graceful(guard.clone());
-            let http_service = HttpServer::auto(exec).service(
-                TraceLayer::new_for_http()
-                    .make_span_with(make_request_span)
-                    .into_layer(router),
-            );
+            let http_service = HttpServer::auto(exec).service(http_service_with_tracing.into_layer(router));
             listener.serve_graceful(guard, http_service).await;
         });
 
