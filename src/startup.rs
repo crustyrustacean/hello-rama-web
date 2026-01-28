@@ -6,7 +6,7 @@ use crate::errors::AppBoxError;
 use crate::errors::AppErrorContext;
 use crate::errors::AppOpaqueError;
 use crate::routes::{
-    health_check, not_found, home_page, reset_message, update_message, robots_txt, sitemap_xml
+    health_check, home_page, not_found, reset_message, robots_txt, sitemap_xml, update_message,
 };
 use crate::state::AppState;
 use crate::telemetry::make_request_span;
@@ -76,7 +76,7 @@ impl Application {
                 .with_public(),
         )
         .into_layer(assets_dir);
-        
+
         Router::new_with_state(state)
             .with_sub_router_make_fn("/api", |router| {
                 router.with_sub_router_make_fn("/v1", |router| {
@@ -100,13 +100,14 @@ impl Application {
         let router = self.router;
         let listener = self.listener;
 
-         let http_service_with_tracing =
+        let http_service_with_tracing =
             TraceLayer::new_for_http().make_span_with(make_request_span);
 
         tracing::info!("Running the application...");
         graceful.spawn_task_fn(async |guard| {
             let exec = Executor::graceful(guard.clone());
-            let http_service = HttpServer::auto(exec).service(http_service_with_tracing.into_layer(router));
+            let http_service =
+                HttpServer::auto(exec).service(http_service_with_tracing.into_layer(router));
             listener.serve_graceful(guard, http_service).await;
         });
 

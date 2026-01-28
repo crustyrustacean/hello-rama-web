@@ -1,0 +1,10 @@
+[book]
+title = "Hello Rama Web"
+authors = ["Jeffery D. Mitchell"]
+description = "A web application template built with Rama, Tera, and Datastar."
+src = "docs"
+language = "en"
+
+[output.html]
+git-repository-url = "https://github.com/crustyrustacean/hello-rama-web"
+edit-url-template = "https://github.com/crustyrustacean/hello-rama-web/edit/trunk/docs/{path}"
